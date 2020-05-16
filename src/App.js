@@ -1,47 +1,57 @@
 import React from 'react';
-// import Proptypes from 'prop-types'
+import axios from 'axios';
+import Movie from './Movie';
+import './App.css';
+
+const API_YTS = "https://yts-proxy.now.sh/";
+const SORT_BY_RATING = "?sort_by=rating"
+const URL_LIST_MOVIES = API_YTS + "list_movies.json" + SORT_BY_RATING;
 
 class App extends React.Component {
   state = {
-    count: 0
+    isLoading: true,
+    movies: []
   };
 
-  add = () => {
-    this.setState(current => ({ count: current.count + 1}))
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies }
+      }
+    } = await axios.get(URL_LIST_MOVIES);
+
+    this.setState({ movies, isLoading: false });
   };
-
-  minus = () => {
-    this.setState(current => ({ count: current.count - 1 }))
-  };
-
-  constructor(props) {
-    super(props);
-    console.log("constructor");
-  }
-
-  componentDidUpdate() {
-    console.log("component did update")
-  }
 
   componentDidMount() {
-    console.log("component did mount");
-  };
-
-  componentWillUnmount() {
-    console.log("component will unmount")
+    this.getMovies();
   }
 
-  
   render() {
-    console.log("I'm rendering")
+    const { isLoading, movies } = this.state;
     return (
-      <div>
-        <h1>The number is : {this.state.count}</h1>
-        <button onClick={this.add}>Add</button>
-        <button onClick={this.minus}>Minus</button>
-      </div>
+      <section className="container">
+        {isLoading ?
+        <div className="loader">
+          <span className="loader__text">Loading...</span>
+          </div> : <div className="movies">
+            {movies.map(movie => (
+            <Movie
+              key={movie.id}
+              id={movie.id}
+              title={movie.title}
+              year={movie.year}
+              summary={movie.summary}
+              poster={movie.medium_cover_image}
+              genres={movie.genres}
+            />
+        ))}
+        </div>
+        }
+      </section>
     )
   };
 };
+
 
 export default App;
